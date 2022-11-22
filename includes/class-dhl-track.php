@@ -44,7 +44,7 @@ class DHL_Track
             wp_schedule_single_event(time() + 60, 'dhl_takip_kodunu_olustur', array( $order_id ));
         }
  
-        if ('transit' === $status->status->statusCode) {
+        if ('transit' === $status->status->statusCode && 'cancelled' !== $order->get_status()) {
             update_post_meta($order_id, '_dhl_tracking_code', $dhl_tracking_id);
             $order->update_status('transit', 'DHL tarafından kargo alındı, durum değiştirildi');
             error_log(print_r('DHL takip kodu oluştur fonksiyonuna içndeki if e girdi ----satır 46', true));
