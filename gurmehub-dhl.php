@@ -12,7 +12,7 @@
  */
 
 define( 'GDHL_TRACKING_ID', 'gdhl_tracking_id' );
-define( 'GDHL_SCHEDULE_DELAY_TIME', strtotime( '+5 Minutes' ) );
+define( 'GDHL_SCHEDULE_DELAY_TIME', strtotime( '+4 Hours' ) );
 
 require_once 'vendor/autoload.php';
 require_once __DIR__ . '/includes/gdhl-functions.php';
