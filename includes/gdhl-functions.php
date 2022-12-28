@@ -8,7 +8,7 @@ function gdhl_twilio() {
 	return new GDHL_Twilio();
 }
 
-function gdhl_get_tracking_id_form_comments( $order_id, $retry_count = 4 ) {
+function gdhl_get_tracking_id_form_comments( $order_id ) {
 	global $wpdb;
 	$tracking_id = false;
 	$tracking    = $wpdb->get_var(
@@ -26,28 +26,11 @@ function gdhl_get_tracking_id_form_comments( $order_id, $retry_count = 4 ) {
 		if ( ! empty( $trackling ) ) {
 			$tracking_id = $trackling[1];
 		}
-		gdhl_logger( $order_id, "Tracking id tespit edildi. Id : {$tracking_id}. Takip başlatıldı" );
 		update_post_meta( $order_id, GDHL_TRACKING_ID, $tracking_id );
-		wp_schedule_single_event( GDHL_SCHEDULE_DELAY_TIME, 'gdhl_check_shipment_status_event', array( $order_id ) );
-
 	}
 
-	if ( 0 === $retry_count && false === $tracking_id ) {
-		gdhl_logger( $order_id, 'Son kez denendi tracking id bulunamadı.' );
-	}
+	return $tracking_id;
 
-	if ( false === $tracking_id && $retry_count > 0 ) {
-		gdhl_logger( $order_id, "Tracking id bulunamadı. {$retry_count} kez daha denenecek." );
-		$retry_count--;
-		wp_schedule_single_event(
-			GDHL_SCHEDULE_DELAY_TIME,
-			'gdhl_get_tracking_id_form_comments_event',
-			array(
-				$order_id,
-				$retry_count,
-			)
-		);
-	}
 }
 
 function gdhl_update_order_status_by_dhl_response( $order_id, $dhl_response ) {
@@ -81,11 +64,6 @@ function gdhl_update_order_status_by_dhl_response( $order_id, $dhl_response ) {
 		}
 	} catch ( Exception  $e ) {
 		gdhl_logger( $order_id, $e->getMessage() );
-	}
-
-	if ( $order->get_status() !== 'delivered' ) {
-		gdhl_logger( $order_id, 'Tekrar sıraya eklendi.' );
-		wp_schedule_single_event( GDHL_SCHEDULE_DELAY_TIME, 'gdhl_check_shipment_status_event', array( $order_id ) );
 	}
 }
 

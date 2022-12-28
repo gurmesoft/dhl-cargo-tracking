@@ -5,7 +5,6 @@ class GDHL_WooCommerce {
 		add_action( 'woocommerce_order_status_processing', array( $this, 'order_status_processing' ) );
 		add_action( 'woocommerce_order_status_transit', array( $this, 'order_status_transit' ) );
 		add_action( 'woocommerce_order_status_delivered', array( $this, 'order_status_delivered' ) );
-		add_action( 'woocommerce_order_status_completed', 'gdhl_get_tracking_id_form_comments' );
 	}
 
 	public function order_statuses( $statuses ) {

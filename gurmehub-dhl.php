@@ -20,6 +20,15 @@ require_once __DIR__ . '/includes/class-gdhl-schedule.php';
 require_once __DIR__ . '/includes/class-gdhl-wordpress.php';
 require_once __DIR__ . '/includes/class-gdhl-woocommerce.php';
 
+register_activation_hook(
+	__FILE__,
+	function() {
+		if ( ! wp_next_scheduled( 'gdhl_check_shipment_status_event' ) ) {
+			wp_schedule_event( time(), 'dhl_every_four_hours', 'gdhl_check_shipment_status_event' );
+		}
+	}
+);
+
 new GDHL_Schedule();
 new GDHL_WordPress();
 new GDHL_WooCommerce();

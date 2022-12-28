@@ -3,38 +3,49 @@
 class GDHL_Schedule {
 
 	public function __construct() {
-		add_action( 'gdhl_check_shipment_status_event', array( $this, 'check_shipment_status' ), 10, 2 );
-		add_action( 'gdhl_get_tracking_id_form_comments_event', 'gdhl_get_tracking_id_form_comments', 10, 2 );
+		add_filter( 'cron_schedules', array( $this, 'add_new_time_space' ), 100 );
+		add_filter( 'gdhl_check_shipment_status_event', array( $this, 'process_dhl_query' ), 100 );
 	}
 
-	public function check_shipment_status( $order_id, $retry_count = 4 ) {
-		gdhl_logger( $order_id, '################################################### ACTION START ###################################################' );
-		$tracking_id = get_post_meta( $order_id, GDHL_TRACKING_ID, true );
-		$response    = gdhl_dhl()->get_status_by_tracking_id( $tracking_id );
+	public function add_new_time_space( $times ) {
+		$times['dhl_every_four_hours'] = array(
+			'interval' => 60,
+			'display'  => 'DHL 4 Saatte Bir Durum Sorgulama',
+		);
+		return $times;
+	}
 
-		if ( false === $response['status'] ) {
-			$log_message = print_r( $response['message'], true );
-			gdhl_logger( $order_id, "Durum sorgulama başarısız : {$log_message}" );
+	public function process_dhl_query() {
+		$args   = array(
+			'status' => array( 'wc-transit', 'wc-completed' ),
+		);
+		$orders = wc_get_orders( $args );
 
-			if ( 0 === $retry_count ) {
-				gdhl_logger( $order_id, 'Son kez denendi DHL son duruma erişilemedi.' );
-			} else {
-				gdhl_logger( $order_id, "DHL son duruma erişilemedi. {$retry_count} kez daha denenecek." );
-				$retry_count--;
-				wp_schedule_single_event(
-					GDHL_SCHEDULE_DELAY_TIME,
-					'gdhl_check_shipment_status_event',
-					array(
-						$order_id,
-						$retry_count,
-					)
-				);
+		foreach ( $orders as $order ) {
+			$order_id    = $order->get_id();
+			$tracking_id = get_post_meta( $order_id, GDHL_TRACKING_ID, true );
+
+			if ( ! $tracking_id ) {
+				$tracking_id = gdhl_get_tracking_id_form_comments( $order_id );
 			}
-		} else {
-			$log_message = print_r( $response['message']->status, true );
-			gdhl_logger( $order_id, "Durum sorgulama başarılı : {$log_message}" );
-			gdhl_update_order_status_by_dhl_response( $order_id, $response['message'] );
-		}
 
+			if ( $tracking_id ) {
+
+				$response = gdhl_dhl()->get_status_by_tracking_id( $tracking_id );
+
+				if ( false === $response['status'] ) {
+					$log_message = print_r( $response['message'], true );
+					gdhl_logger( $order_id, "Durum sorgulama başarısız : {$log_message}" );
+				} else {
+					$log_message = print_r( $response['message']->status, true );
+					gdhl_logger( $order_id, "Durum sorgulama başarılı : {$log_message}" );
+					gdhl_update_order_status_by_dhl_response( $order_id, $response['message'] );
+				}
+			} else {
+				gdhl_logger( $order_id, 'DHL takip no bulunamadı.' );
+			}
+			sleep( 2 );
+		}
 	}
+
 }
