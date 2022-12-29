@@ -11,7 +11,7 @@ class GDHL_Dhl {
 
 		$args = array(
 			'headers' => array(
-				'DHL-API-Key' => 'p4MCNbE3GtcGiXgoDNhl4mQi8tFAxn5n',
+				'DHL-API-Key' => 'GWEMGahRqBvuHeUXvtM7VLdCMlJ7fA4D',
 			),
 		);
 

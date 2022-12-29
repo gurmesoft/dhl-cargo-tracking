@@ -9,7 +9,7 @@ class GDHL_Schedule {
 
 	public function add_new_time_space( $times ) {
 		$times['dhl_every_four_hours'] = array(
-			'interval' => 60,
+			'interval' => 14400,
 			'display'  => 'DHL 4 Saatte Bir Durum Sorgulama',
 		);
 		return $times;
@@ -18,6 +18,8 @@ class GDHL_Schedule {
 	public function process_dhl_query() {
 		$args   = array(
 			'status' => array( 'wc-transit', 'wc-completed' ),
+			 
+			'limit' => 200
 		);
 		$orders = wc_get_orders( $args );
 

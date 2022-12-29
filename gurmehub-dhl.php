@@ -3,7 +3,7 @@
  * Plugin Name: Gurmehub DHL Tracking
  * Description: Gurmehub DHL tracking plugin
  * Plugin URI: https://gurmehub.com/
- * Version: 2.0.0
+ * Version: 2.5.2
  * Author: Gurmehub
  * Author URI: https://gurmehub.com/
  * Text Domain:

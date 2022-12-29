@@ -70,6 +70,6 @@ function gdhl_update_order_status_by_dhl_response( $order_id, $dhl_response ) {
 function gdhl_logger( $order_id, $message ) {
 	if ( class_exists( 'WC_Logger' ) ) {
 		$logger = wc_get_logger();
-		$logger->add( "{$order_id}-gurmehub-dhl-tracking", $message );
+		$logger->add( "gurmehub-dhl-tracking",$order_id.'-'.$message );
 	}
 }
